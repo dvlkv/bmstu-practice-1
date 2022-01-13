@@ -1,0 +1,16 @@
+start`dynamic_array::sort()`
+for`i = 0(1)size` {
+  for`j = 0(1)size` {
+    block`
+     сравнить элемент
+     j и j+1
+    `
+    if(j < j+1) {
+      block(
+         поменять j и
+         j+1 местами
+      )
+    }
+  }
+}
+stop(Конец)

@@ -7,16 +7,7 @@
 
 auto st = new dynamic_array<Student>();
 
-void read_user_handler() {
-    std::cout << "Введите ФИО (макс 25 символов на слово): ";
-    char* name = new char[50];
-    char* surname = new char[50];
-    char* patronymic = new char[50];
-    std::cin >> name;
-    std::cin >> surname;
-    std::cin >> patronymic;
-
-    std::cout << "Введите дату рождения (дд.мм.гггг): ";
+int read_date() {
     char* date_str = new char[255];
     std::tm tm{};
     while (true) {
@@ -28,8 +19,10 @@ void read_user_handler() {
             break;
         }
     }
+    return timelocal(&tm);
+}
 
-    std::cout << "Введите курс (число): ";
+int read_grade() {
     char* grade_str = new char[255];
     int grade;
     while (true) {
@@ -44,12 +37,29 @@ void read_user_handler() {
             break;
         }
     }
+    return grade;
+}
+
+void read_user_handler() {
+    std::cout << "Введите ФИО (макс 25 символов на слово): ";
+    char* name = new char[50];
+    char* surname = new char[50];
+    char* patronymic = new char[50];
+    std::cin >> name;
+    std::cin >> surname;
+    std::cin >> patronymic;
+
+    std::cout << "Введите дату рождения (дд.мм.гггг): ";
+    int date = read_date();
+
+    std::cout << "Введите курс (число): ";
+    int grade = read_grade();
 
     char* group = new char[20];
     std::cout << "Введите группу (макс 10 символов): ";
     std::cin >> group;
 
-    st->push(Student(name, surname, patronymic, timelocal(&tm), grade, group));
+    st->push(Student(name, surname, patronymic, date, grade, group));
 }
 
 void query_handler() {
@@ -132,9 +142,69 @@ void export_bin_handler() {
 
 void edit_user_handler() {
     print_table(*st);
+    int n;
+    while (true) {
+        std::cout << "Введите номер студента: ";
+        std::cin >> n;
+        if (n <= 0 || n > st->size()) {
+            std::cout << "Введен неверный номер студента.\n";
+            continue;
+        }
+        break;
+    }
+    n--;
+    while (true) {
+        std::cout << "Выберите поле для редактирования:\n";
+        std::cout << "1. Дата рождения\n";
+        std::cout << "2. Курс\n";
+        std::cout << "3. Имя\n";
+        std::cout << "4. Фамилия\n";
+        std::cout << "5. Отчество\n";
+        std::cout << "6. Группа\n";
+        std::cout << "0. Отменить\n\n";
+        std::cout << "Выберите вариант: ";
+        int option;
+        std::cin >> option;
+        if (option < 0 || option > 6) {
+            std::cout << "Выбран не верный параметр.\n\n\n";
+            continue;
+        }
+        if (option == 0) {
+            break;
+        }
+        std::cout << "Введите новое значение: ";
+        switch (option) {
+            case 1:
+                st->storage[n].birthdate = read_date();
+                break;
+            case 2:
+                st->storage[n].grade = read_grade();
+                break;
+            case 3:
+                std::cin >> st->storage[n].name;
+                break;
+            case 4:
+                std::cin >> st->storage[n].surname;
+                break;
+            case 5:
+                std::cin >> st->storage[n].patronymic;
+                break;
+            case 6:
+                std::cin >> st->storage[n].group;
+        }
+        break;
+    }
+    dynamic_array<Student> affected{};
+    affected.push(st->get(n));
+    print_table(affected);
 }
 
 void remove_user_handler() {
+    print_table(*st);
+    std::cout << "Введите номер пользователя: ";
+    unsigned int n;
+    std::cin >> n;
+    st->remove(n-1);
     print_table(*st);
 }
 
