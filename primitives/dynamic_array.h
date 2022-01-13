@@ -25,6 +25,7 @@ public:
     unsigned int size();
     void push(T value);
     void resize(unsigned int n);
+    void sort(int handler(T a, T b));
     T& get(unsigned int n);
 
 
@@ -87,6 +88,20 @@ void dynamic_array<T>::resize(unsigned int n) {
 template<typename T>
 T& dynamic_array<T>::operator[](unsigned int n) {
     return this->storage[n];
+}
+
+template<typename T>
+void dynamic_array<T>::sort(int compare(T a, T b)) {
+    for (int i = 0; i < this->_size; i++) {
+        for (int  j = 0; j < this->_size - i - 1; j++) {
+            int cmp_result = compare(this->storage[j], this->storage[j+1]);
+            if (cmp_result > 0) {
+                auto tmp = this->storage[j];
+                this->storage[j] = this->storage[j+1];
+                this->storage[j+1] = tmp;
+            }
+        }
+    }
 }
 
 #endif //KURS_1_PRAKTIKA_DYNAMIC_ARRAY_H

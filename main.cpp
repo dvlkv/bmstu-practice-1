@@ -45,15 +45,24 @@ void read_user_handler() {
         }
     }
 
-    char* group = new char[10];
-    std::cout << "Введите группу (макс 5 символов): ";
+    char* group = new char[20];
+    std::cout << "Введите группу (макс 10 символов): ";
     std::cin >> group;
 
     st->push(Student(name, surname, patronymic, timelocal(&tm), grade, group));
 }
 
 void query_handler() {
-    print_table(*st);
+    auto filtered = dynamic_array<Student>();
+    for (int i = 0; i < st->size(); i++) {
+        auto student = st->get(i);
+        time_t bd = student.birthdate;
+        auto bd_time = localtime(&bd);
+        if (bd_time->tm_mon == 3) {
+            filtered.push(student);
+        }
+    }
+    print_table(filtered);
 }
 
 void import_csv_handler() {
@@ -121,9 +130,81 @@ void export_bin_handler() {
     fclose(f);
 }
 
-int main() {
-    import_bin("../keklol.dat");
+void edit_user_handler() {
+    print_table(*st);
+}
 
+void remove_user_handler() {
+    print_table(*st);
+}
+
+int compare_students_bd(Student a, Student b) {
+    return a.birthdate - b.birthdate;
+}
+
+int compare_students_grade(Student a, Student b) {
+    return a.grade - b.grade;
+}
+
+int compare_students_name(Student a, Student b) {
+    return strcmp(a.name, b.name);
+}
+
+int compare_students_surname(Student a, Student b) {
+    return strcmp(a.surname, b.surname);
+}
+
+int compare_students_patronymic(Student a, Student b) {
+    return strcmp(a.patronymic, b.patronymic);
+}
+
+void sort_users_handler() {
+    int (*compare)(Student, Student);
+    while (true) {
+        std::cout << "Варианты сортировки:\n";
+        std::cout << "1. Дата рождения\n";
+        std::cout << "2. Курс\n";
+        std::cout << "3. По имени\n";
+        std::cout << "4. По фамилии\n";
+        std::cout << "5. По отчеству\n";
+        std::cout << "0. Отменить\n\n";
+        std::cout << "Выберите вариант: ";
+        int option;
+        std::cin >> option;
+        if (option < 0 || option > 5) {
+            std::cout << "Выбран не верный параметр.\n\n\n";
+            continue;
+        }
+        if (option == 0) {
+            break;
+        }
+        switch (option) {
+            case 1:
+                compare = compare_students_bd;
+                break;
+            case 2:
+                compare = compare_students_grade;
+                break;
+            case 3:
+                compare = compare_students_name;
+                break;
+            case 4:
+                compare = compare_students_surname;
+                break;
+            case 5:
+                compare = compare_students_patronymic;
+                break;
+        }
+        break;
+    }
+    if (compare == nullptr) {
+        return;
+    }
+    st->sort(compare);
+    print_table(*st);
+}
+
+int main() {
     Menu menu = Menu();
 
     Menu importMenu = Menu();
@@ -140,13 +221,13 @@ int main() {
     Menu editMenu = Menu();
     editMenu
             .add("Создать запись", read_user_handler)
-            .add("Редактировать запись", query_handler)
-            .add("Удалить запись", query_handler)
-            .add("Сортировка", query_handler);
+            .add("Редактировать запись", edit_user_handler)
+            .add("Удалить запись", remove_user_handler)
+            .add("Сортировка", sort_users_handler);
 
 
     menu
-      .add("Просмотр", query_handler)
+      .add("Запрос", query_handler)
       .add("Импорт", &importMenu)
       .add("Экспорт", &exportMenu)
       .add("Редактирование", &editMenu)
